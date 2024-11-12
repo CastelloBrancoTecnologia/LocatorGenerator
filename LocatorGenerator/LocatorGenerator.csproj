@@ -15,8 +15,8 @@
 	  <SignAssembly>False</SignAssembly>
 	  <Company>Castello Branco Tecnologia</Company>
 	  <Product>CastelloBranco.LocatorGenerator</Product>
-	  <AssemblyVersion>2410.5.2201.12</AssemblyVersion>
-	  <Version>1.0.3</Version>
+	  <AssemblyVersion>2411.12.1427.16</AssemblyVersion>
+	  <Version>1.0.4</Version>
 	  <PackageProjectUrl>https://github.com/CastelloBrancoTecnologia/LocatorGenerator</PackageProjectUrl>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <RepositoryUrl>https://github.com/CastelloBrancoTecnologia/LocatorGenerator</RepositoryUrl>
@@ -25,7 +25,18 @@
 
 	<Target Name="PushNuGetPackage" AfterTargets="GenerateNuspec">
 		<Message Text="Push NuGet Package to NuGet Feed" Importance="high"></Message>
-		<Exec Command="$(ProjectDir)..\publicanuget.cmd &quot;$(ProjectDir)bin\$(Configuration)\$(AssemblyName).$(Version).nupkg&quot; "></Exec>
+		<Exec Command="$(ProjectDir)..\..\publicanuget.cmd &quot;$(ProjectDir)bin\$(Configuration)\$(AssemblyName).$(Version).nupkg&quot; "></Exec>
 	</Target>
+
+	<ItemGroup>
+	  <None Include="..\LICENSE.txt">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 	
 </Project>

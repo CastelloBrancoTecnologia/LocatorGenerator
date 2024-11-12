@@ -8,7 +8,7 @@
 	<LangVersion>latest</LangVersion>  
     <Platforms>x64</Platforms>
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>	  
-    <AssemblyVersion>2411.12.0430.38</AssemblyVersion>
+    <AssemblyVersion>2411.12.1427.42</AssemblyVersion>
 	<SelfContained>true</SelfContained>
 	<EnforceExtendedAnalizerRules>true</EnforceExtendedAnalizerRules>
 

@@ -1,40 +1,44 @@
-#CastelloBranco.LocatorGenerator
+# CastelloBranco.LocatorGenerator
 
-CastelloBranco.LocatorGenerator é uma ferramenta para gerar automaticamente o código necessário para localizar e instanciar ViewModels marcados com um atributo especial em projetos WPF, Avalonia, WinUI, UWP e UNO.
+**CastelloBranco.LocatorGenerator** is a tool designed to automatically generate the necessary code to locate and instantiate ViewModels marked with a special attribute in WPF, Avalonia, WinUI, UWP, and UNO projects.
 
-#Uso:
+## Usage
 
-[RegisterOnLocatorAttribute] é usado para marcar classes ViewModel para inclusão no localizador.
+`[RegisterOnLocatorAttribute]` is used to mark ViewModel classes for inclusion in the locator.
 
-Gerador de Código: Uma ferramenta que analisa projetos em busca de classes com o atributo RegisterOnLocatorAttribute e gera um arquivo ViewModelLocator.g.cs para resolver e injetar dependências automaticamente usando a biblioteca CommunityToolkit.Mvvm.
-Estrutura do Projeto
+### Code Generator
 
-LocatorGenerator.exe: O gerador que carrega e analisa um projeto MSBuild fornecido pelo usuário, identifica classes decoradas com [RegisterOnLocatorAttribute] e gera um arquivo ViewModelLocator.g.cs que expõe cada ViewModel identificado como uma propriedade estática, permitindo a injeção de dependência automática.
+This tool scans projects for classes with the `RegisterOnLocatorAttribute` and generates a `ViewModelLocator.g.cs` file to resolve and inject dependencies automatically using the CommunityToolkit.Mvvm library.
 
-1) Build: Compile o projeto LocatorGeneratorTool para obter o executavel
+A standalone MSBuild tool was chosen instead of a source generator because the C# code needs to be ready and available to XAML before compilation. Since XAML processing in these frameworks occurs before a Source Generator executes, the locator class would not be available for binding, leading to compilation errors.
 
-2) NuGet Package: Adicione o pacote CastelloBranco.LocatorGenerator ao projeto que utilizará o localizador gerado.
+## Project Structure
 
-3) No projeto que utilizara o gerador adicione uma tarefa MSBUILD chamando o executavel onde: 
+- **LocatorGenerator.exe**: The generator tool that loads and analyzes a user-specified MSBuild project, identifies classes decorated with `[RegisterOnLocatorAttribute]`, and generates a `ViewModelLocator.g.cs` file. This file exposes each identified ViewModel as a static property, enabling automatic dependency injection.
 
-   execute LocatorGeneratorTool.exe [Caminho da Solução] [Arquivo de Projeto] [Diretório de Saída]
+### Setup
 
-``` xml
+1. **Build**: Compile the `LocatorGeneratorTool` project to obtain the executable.
 
-<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-  <Exec Command="C:\LocatorGenerator\LocatorGenerator.exe $(ProjectDir) $(ProjectName).csproj Generated" />
-</Target>
+2. **NuGet Package**: Add the `CastelloBranco.LocatorGenerator` package to the project that will use the generated locator.
 
-```
+3. **MSBuild Task**: In the project where you will use the generator, add an MSBuild task to call the executable, using the following syntax:
+   
+   Run `LocatorGeneratorTool.exe [SolutionPath] [ProjectFile] [OutputDirectory]`
 
-#Saída: 
+   ```xml
+   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+     <Exec Command="C:\LocatorGenerator\LocatorGenerator.exe $(ProjectDir) $(ProjectName).csproj Generated" />
+   </Target>
+   ```
 
-Após a execução, um arquivo ViewModelLocator.g.cs será gerado no diretório especificado (neste exemplo, Generated\), contendo propriedades estáticas para cada ViewModel detectado.
+## Output
 
-O arquivo ViewModelLocator.g.cs gerado terá uma estrutura semelhante a:
+After execution, a `ViewModelLocator.g.cs` file will be generated in the specified directory (in this example, `Generated\`), containing static properties for each detected ViewModel.
 
-``` csharp
+The generated `ViewModelLocator.g.cs` file will have a structure similar to the following:
 
+```csharp
 public partial class ViewModelLocator 
 {
     public ViewModelLocator() { }
@@ -43,23 +47,21 @@ public partial class ViewModelLocator
     public static namespace.ViewModel2? ViewModel2 => Ioc.Default.GetRequiredService<namespace.ViewModel2>(); 
     // etc.
 }
-
 ```
 
-Para registrar uma classe como um ViewModel localizável:
+### Registering a ViewModel Class
 
-``` csharp
+To register a class as a locatable ViewModel, mark it with `[RegisterOnLocator]`:
 
+```csharp
 [RegisterOnLocator]
-public class MeuViewModel { }
+public class MyViewModel { }
+```
 
-````
-
-#Licença: 
+## License
 
 MIT
 
-#Contribuição:
+## Contribution
 
-Contribuições são bem-vindas! Siga o fluxo de pull requests e confira nossa política de contribuições.
-
+Contributions are welcome! Please follow the pull request process and review our contribution policy.
