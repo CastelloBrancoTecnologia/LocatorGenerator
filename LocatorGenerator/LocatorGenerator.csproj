@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>net8.0</TargetFramework>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <Nullable>enable</Nullable>
+	  <Title>CastelloBranco.LocatorGenerator</Title>
+	  <Authors>Castello Branco Tecnologia</Authors>
+	  <PackageId>CastelloBranco.LocatorGenerator</PackageId>
+	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	  <Description>Generate Locator for WPF/Avalonia/WinUI/UWP/UNO</Description>
+	  <Copyright>Castello Branco Tecnologia</Copyright>
+	  <AssemblyName>CastelloBranco.LocatorGenerator</AssemblyName>
+	  <RootNamespace>CastelloBranco.LocatorGenerator</RootNamespace>
+	  <SignAssembly>False</SignAssembly>
+	  <Company>Castello Branco Tecnologia</Company>
+	  <Product>CastelloBranco.LocatorGenerator</Product>
+	  <AssemblyVersion>2410.5.2201.12</AssemblyVersion>
+	  <Version>1.0.3</Version>
+	  <PackageProjectUrl>https://github.com/CastelloBrancoTecnologia/LocatorGenerator</PackageProjectUrl>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <RepositoryUrl>https://github.com/CastelloBrancoTecnologia/LocatorGenerator</RepositoryUrl>
+	  <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+  </PropertyGroup>
+
+	<Target Name="PushNuGetPackage" AfterTargets="GenerateNuspec">
+		<Message Text="Push NuGet Package to NuGet Feed" Importance="high"></Message>
+		<Exec Command="$(ProjectDir)..\publicanuget.cmd &quot;$(ProjectDir)bin\$(Configuration)\$(AssemblyName).$(Version).nupkg&quot; "></Exec>
+	</Target>
+	
+</Project>

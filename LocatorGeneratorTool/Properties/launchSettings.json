@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LocatorGenerator": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Users\\cesar\\Documents\\GitHub\\CastelloBranco\\MonetizeAvalonia\\Monetize\\Monetize\" \"Monetize.csproj\" \"Generated\"  "
+    }
+  }
+}
