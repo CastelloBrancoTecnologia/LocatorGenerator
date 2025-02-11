@@ -6,7 +6,6 @@
 	  <LangVersion>latest</LangVersion>
 	  <Nullable>enable</Nullable>
 	  <EnforceExtendedAnalizerRules>true</EnforceExtendedAnalizerRules>
-	  <AssemblyVersion>2502.11.0051.29</AssemblyVersion>
 	  <IsRoslynAnalyzer>true</IsRoslynAnalyzer>
 	  <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 	  <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
@@ -27,10 +26,11 @@
 	  <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	  <IncludeSymbols>True</IncludeSymbols>
 	  <PackageId>CastelloBranco.LocatorGenerator</PackageId>
-	  <AssemblyVersion>2501.10.0001.1</AssemblyVersion>
+	  <AssemblyVersion>2502.11.0121.5</AssemblyVersion>
 	  <Product>CastelloBranco.LocatorGenerator</Product>
 	  <AssemblyName>CastelloBranco.LocatorGenerator</AssemblyName>
 	  <RootNamespace>CastelloBranco.LocatorGenerator</RootNamespace>
+	  <NeutralLanguage>pt-BR</NeutralLanguage>
 
   </PropertyGroup>
 
@@ -45,6 +45,17 @@
 	<ItemGroup>
 		<!-- Necessário para que o Visual Studio reconheça como um Source Generator -->
 		<None Include="**\*.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="..\LICENSE.txt">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	</ItemGroup>
 
 	<Target Name="PushNuGetPackage" AfterTargets="GenerateNuspec">

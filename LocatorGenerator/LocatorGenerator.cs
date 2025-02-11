@@ -11,7 +11,7 @@ using AutoRegisterInject;
 namespace CastelloBranco.LocatorGenerator;
 
 [Generator]
-public class LocatorGenerator : ISourceGenerator
+public class LocatorSourceGenerator : ISourceGenerator
 {
     public void Initialize(GeneratorInitializationContext context)
     {
@@ -109,7 +109,7 @@ public class LocatorGenerator : ISourceGenerator
 
     private static string GenerateSingletonClass(List<string> classNames, string nameSpace)
     {
-        string[] viewModels = classNames.Where(x => x.EndsWith("ViewModel")).ToArray();
+        string[] viewModels = classNames.Where(x => x.EndsWith("ViewModel", StringComparison.InvariantCulture)).ToArray();
 
         var sb = new StringBuilder();
 

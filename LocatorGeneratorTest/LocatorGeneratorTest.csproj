@@ -5,7 +5,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>2502.11.0051.32</AssemblyVersion>
+    <AssemblyVersion>2502.11.0121.36</AssemblyVersion>
 	<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 	<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
 	<RootNamespace>CastelloBranco.LocatorGeneratorTest</RootNamespace>
