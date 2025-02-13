@@ -27,7 +27,7 @@
 	  <IncludeSymbols>True</IncludeSymbols>
 	  <PackageId>CastelloBranco.LocatorGenerator</PackageId>
 	  <Version>2.0.9</Version>
-	  <AssemblyVersion>2502.11.0137.9</AssemblyVersion>
+	  <AssemblyVersion>2502.13.0531.11</AssemblyVersion>
 	  <PackageVersion>$(Version)</PackageVersion>
 	  <Product>CastelloBranco.LocatorGenerator</Product>
 	  <AssemblyName>CastelloBranco.LocatorGenerator</AssemblyName>
