@@ -67,7 +67,7 @@ public class ZoomViewViewModel : ObservableObject
 }
 
 [RegisterSingleton]
-public class BlahViewModel : ObservableObject
+public class BlaBlaViewModel : ObservableObject
 {
     public void Foo()
     {
