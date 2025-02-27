@@ -65,6 +65,7 @@ public class LocatorSourceGenerator : ISourceGenerator
 
             namespace @namespace;
 
+            [Generated]
             public class AutoWireViewModel : AvaloniaObject
             {
                 public static readonly AttachedProperty<bool> EnabledProperty =
@@ -87,14 +88,17 @@ public class LocatorSourceGenerator : ISourceGenerator
 
                 private static void HandleEnabledPropertyChanged(Control controlElem, AvaloniaPropertyChangedEventArgs args)
                 {
-                    if (((bool?)args.NewValue ?? false))
+                    if (controlElem is Window || controlElem is UserControl)
                     {
-                        Type vmType = ViewLocator
-                                      .ViewModelsViewsDictionary
-                                      .FirstOrDefault(x => x.Value == args.Sender.GetType())
-                                      .Key;
+                        if (((bool?)args.NewValue ?? false))
+                        {
+                            Type vmType = ViewLocator
+                                          .ViewModelsViewsDictionary
+                                          .FirstOrDefault(x => x.Value == controlElem.GetType())
+                                          .Key;
 
-                        controlElem.DataContext = (Ioc.Default.GetRequiredService(vmType) ?? throw new InvalidOperationException($""{vmType.Name} is not registered in services collection.""));
+                            controlElem.DataContext = (Ioc.Default.GetRequiredService(vmType) ?? throw new InvalidOperationException($""{vmType.Name} is not registered in services collection.""));
+                        }
                     }
                 }
             }
@@ -105,6 +109,13 @@ public class LocatorSourceGenerator : ISourceGenerator
         return context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.RootNamespace", out var ns)
             ? ns
             : context.Compilation.AssemblyName ?? "GlobalNamespace";
+    }
+
+    private static string GetClassnameWithoutNamespace (string fullNmae)
+    {
+        int lastDotIndex = fullNmae.LastIndexOf('.');
+
+        return lastDotIndex >= 0 ? fullNmae.Substring(lastDotIndex + 1) : fullNmae;
     }
 
     private static string GenerateSingletonClass(List<string> classNames, string nameSpace)
@@ -136,17 +147,21 @@ public class LocatorSourceGenerator : ISourceGenerator
         {
             string viewModelName = viewModels[i];
 
-            string viewName = viewModelName.Substring(0, viewModelName.Length - "Model".Length);
+            string viewName = GetClassnameWithoutNamespace(viewModelName.Substring(0, viewModelName.Length - "Model".Length));
 
-            string alternateViewName = viewModelName.Substring(0, viewModelName.Length - "ViewModel".Length);
+            string alternateViewName = GetClassnameWithoutNamespace(viewModelName.Substring(0, viewModelName.Length - "ViewModel".Length));
 
-            if (classNames.Contains(viewName))
+            if (classNames.Any (x => GetClassnameWithoutNamespace(x) == viewName))
             {
-                sb.AppendLine($"        {{ typeof({viewModelName}), typeof({viewName}) }}, ");
+                string s = classNames.First(x => GetClassnameWithoutNamespace(x) == viewName);
+
+                sb.AppendLine($"        {{ typeof({viewModelName}), typeof({s}) }}, ");
             }
-            else if (classNames.Contains(alternateViewName))
+            else if (classNames.Any (x => GetClassnameWithoutNamespace(x) == alternateViewName))
             {
-                sb.AppendLine($"        {{ typeof({viewModelName}), typeof({alternateViewName}) }}, ");
+                string s = classNames.First(x => GetClassnameWithoutNamespace(x) == alternateViewName);
+
+                sb.AppendLine($"        {{ typeof({viewModelName}), typeof({s}) }}, ");
             }
             else
             {
@@ -168,7 +183,6 @@ public class LocatorSourceGenerator : ISourceGenerator
         sb.AppendLine("            return new TextBlock { Text = $\"Not Found: {data.GetType().Name} has no mapped View\" };");
         sb.AppendLine();
         sb.AppendLine("        return Ioc.Default.GetService(viewType) as Control ??");
-        sb.AppendLine("               throw new InvalidOperationException($\"{viewType.Name} is not registered as service in Ioc\");");
         sb.AppendLine("    }");
         sb.AppendLine();
         sb.AppendLine("    public bool Match(object? data) => data is ObservableObject  ;");
