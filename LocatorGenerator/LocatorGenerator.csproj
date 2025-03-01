@@ -24,8 +24,8 @@
 	  <IncludeSymbols>True</IncludeSymbols>
 	  <PackageId>CastelloBranco.LocatorGenerator</PackageId>
 	  <PackageTags>source-generator roslyn csharp</PackageTags>
-	  <Version>2.1.6</Version>
-	  <AssemblyVersion>2502.22.2251.23</AssemblyVersion>
+	  <Version>2.1.8</Version>
+	  <AssemblyVersion>2502.27.2106.25</AssemblyVersion>
 	  <PackageVersion>$(Version)</PackageVersion>
 	  <Product>CastelloBranco.LocatorGenerator</Product>
 	  <AssemblyName>CastelloBranco.LocatorGenerator</AssemblyName>

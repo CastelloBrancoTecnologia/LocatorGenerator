@@ -1,6 +1,8 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -48,13 +50,16 @@ public class LocatorSourceGenerator : ISourceGenerator
             }
         }
 
-        string generatedCode = GenerateSingletonClass(markedClasses, nameSpace);
+        string version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown";
 
-        context.AddSource("ViewLocator.g.cs", SourceText.From(generatedCode, Encoding.UTF8));
-
-        context.AddSource("AutoWrire.g.cs", SourceText.From(AutoWrireSorceCode.Replace("@namespace", nameSpace), Encoding.UTF8));
+        string generatedCode1  = GenerateSingletonClass(markedClasses, nameSpace, version);
+        string generatedCode2  = AutoWrireSorceCode.Replace("@namespace", nameSpace).Replace("@version", version);
+        
+        context.AddSource("ViewLocator.g.cs", SourceText.From(generatedCode1, Encoding.UTF8));
+        context.AddSource("AutoWrire.g.cs",   SourceText.From(generatedCode2, Encoding.UTF8));
     }
-
+    
+    
     private const string AutoWrireSorceCode = @"
             using Avalonia;
             using Avalonia.Controls;
@@ -62,10 +67,11 @@ public class LocatorSourceGenerator : ISourceGenerator
             using Microsoft.Extensions.DependencyInjection;
             using System;
             using System.Linq;
+            using System.CodeDom.Compiler;
 
             namespace @namespace;
 
-            [Generated]
+            [GeneratedCode(""CastelloBranco.LocatorGenerator"", ""@version"")]
             public class AutoWireViewModel : AvaloniaObject
             {
                 public static readonly AttachedProperty<bool> EnabledProperty =
@@ -111,14 +117,26 @@ public class LocatorSourceGenerator : ISourceGenerator
             : context.Compilation.AssemblyName ?? "GlobalNamespace";
     }
 
-    private static string GetClassnameWithoutNamespace (string fullNmae)
+    private static string GetClassnameWithoutNamespace(string fullNmae)
     {
         int lastDotIndex = fullNmae.LastIndexOf('.');
+        int afterLastDotIndex = lastDotIndex + 1;
 
-        return lastDotIndex >= 0 ? fullNmae.Substring(lastDotIndex + 1) : fullNmae;
+        if (lastDotIndex < 0)
+        {
+            return fullNmae;
+        }
+        else if (afterLastDotIndex >= fullNmae.Length)
+        {
+            return "";
+        }
+        else
+        {
+            return fullNmae.Substring(afterLastDotIndex);
+        }
     }
 
-    private static string GenerateSingletonClass(List<string> classNames, string nameSpace)
+    private static string GenerateSingletonClass(List<string> classNames, string nameSpace, string version)
     {
         string[] viewModels = classNames.Where(x => x.EndsWith("ViewModel", StringComparison.InvariantCulture)).ToArray();
 
@@ -127,6 +145,7 @@ public class LocatorSourceGenerator : ISourceGenerator
         sb.AppendLine("#nullable enable ");
         sb.AppendLine();
         sb.AppendLine("using System;");
+        sb.AppendLine("using System.CodeDom.Compiler;");
         sb.AppendLine("using System.Collections.Generic;");
         sb.AppendLine("using Avalonia.Controls;");
         sb.AppendLine("using Avalonia.Controls.Templates;");
@@ -136,6 +155,7 @@ public class LocatorSourceGenerator : ISourceGenerator
         sb.AppendLine();
         sb.AppendLine($"namespace {nameSpace};");
         sb.AppendLine();
+        sb.AppendLine($"[GeneratedCode(\"CastelloBranco.Locator\", \"{version}\")]");
         sb.AppendLine("public class ViewLocator : IDataTemplate");
         sb.AppendLine("{");
         sb.AppendLine("    public static bool SupportsRecycling => false;");
@@ -173,16 +193,19 @@ public class LocatorSourceGenerator : ISourceGenerator
         sb.AppendLine();
         sb.AppendLine("    public Control Build(object? data)");
         sb.AppendLine("    {");
+        sb.AppendLine();
         sb.AppendLine("        if (data == null)");
         sb.AppendLine("            return new TextBlock { Text = \"Not Found: ViewModel is null\" };");
         sb.AppendLine();
+        sb.AppendLine("        string viewModelTypeName = data.GetType().Name; ");
+        sb.AppendLine();
         sb.AppendLine("        if (!ViewModelsViewsDictionary.TryGetValue(data.GetType(), out var viewType))");
-        sb.AppendLine("            return new TextBlock { Text = $\"Not Found: {data.GetType().Name} has no mapped View\" };");
+        sb.AppendLine("            return new TextBlock { Text = $\"Not Found: {viewModelTypeName} has no mapped View for ViewModel {viewModelTypeName} \" };");
         sb.AppendLine();
         sb.AppendLine("        if (viewType == null)");
-        sb.AppendLine("            return new TextBlock { Text = $\"Not Found: {data.GetType().Name} has no mapped View\" };");
+        sb.AppendLine("            return new TextBlock { Text = $\"Not Found: {viewModelTypeName} has no mapped View for ViewModel {viewModelTypeName} \" };");
         sb.AppendLine();
-        sb.AppendLine("        return Ioc.Default.GetService(viewType) as Control ??");
+        sb.AppendLine("        return (Ioc.Default.GetService(viewType) as Control ?? throw new Exception($\"Registered View {viewType.Name} for ViewModel {viewModelTypeName} is not an Control \"))");
         sb.AppendLine("    }");
         sb.AppendLine();
         sb.AppendLine("    public bool Match(object? data) => data is ObservableObject  ;");
