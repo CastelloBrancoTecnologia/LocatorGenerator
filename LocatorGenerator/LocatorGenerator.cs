@@ -1,6 +1,6 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -8,12 +8,13 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using AutoRegisterInject;
 
 namespace CastelloBranco.LocatorGenerator;
 
 [Generator]
+#pragma warning disable RS1036
 public class LocatorSourceGenerator : ISourceGenerator
+#pragma warning restore RS1036
 {
     public void Initialize(GeneratorInitializationContext context)
     {
@@ -40,7 +41,7 @@ public class LocatorSourceGenerator : ISourceGenerator
         foreach (var classDeclaration in receiver.CandidateClasses)
         {
             var model = context.Compilation.GetSemanticModel(classDeclaration.SyntaxTree);
-            var classSymbol = model.GetDeclaredSymbol(classDeclaration) as INamedTypeSymbol;
+            INamedTypeSymbol? classSymbol = model.GetDeclaredSymbol(classDeclaration);
 
             if (classSymbol?.GetAttributes().Any(attr =>
                 attr.AttributeClass is not null && 
@@ -50,10 +51,11 @@ public class LocatorSourceGenerator : ISourceGenerator
             }
         }
 
-        string version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown";
-
-        string generatedCode1  = GenerateSingletonClass(markedClasses, nameSpace, version);
-        string generatedCode2  = AutoWrireSorceCode.Replace("@namespace", nameSpace).Replace("@version", version);
+        string version = this.GetType().Assembly.ImageRuntimeVersion;
+        string toolname = "CastelloBranco.LocatorGenerator";
+        
+        string generatedCode1  = GenerateSingletonClass(markedClasses, nameSpace, version, toolname);
+        string generatedCode2  = AutoWrireSorceCode.Replace("@namespace", nameSpace).Replace("@version", version).Replace("@toolname", toolname);
         
         context.AddSource("ViewLocator.g.cs", SourceText.From(generatedCode1, Encoding.UTF8));
         context.AddSource("AutoWrire.g.cs",   SourceText.From(generatedCode2, Encoding.UTF8));
@@ -61,17 +63,17 @@ public class LocatorSourceGenerator : ISourceGenerator
     
     
     private const string AutoWrireSorceCode = @"
+            using System;
+            using System.Linq;
+            using System.CodeDom.Compiler;
             using Avalonia;
             using Avalonia.Controls;
             using CommunityToolkit.Mvvm.DependencyInjection;
             using Microsoft.Extensions.DependencyInjection;
-            using System;
-            using System.Linq;
-            using System.CodeDom.Compiler;
 
             namespace @namespace;
 
-            [GeneratedCode(""CastelloBranco.LocatorGenerator"", ""@version"")]
+            [GeneratedCode(""@toolname"", ""@version"")]
             public class AutoWireViewModel : AvaloniaObject
             {
                 public static readonly AttachedProperty<bool> EnabledProperty =
@@ -136,7 +138,7 @@ public class LocatorSourceGenerator : ISourceGenerator
         }
     }
 
-    private static string GenerateSingletonClass(List<string> classNames, string nameSpace, string version)
+    private static string GenerateSingletonClass(List<string> classNames, string nameSpace, string version, string toolname)
     {
         string[] viewModels = classNames.Where(x => x.EndsWith("ViewModel", StringComparison.InvariantCulture)).ToArray();
 
@@ -155,7 +157,7 @@ public class LocatorSourceGenerator : ISourceGenerator
         sb.AppendLine();
         sb.AppendLine($"namespace {nameSpace};");
         sb.AppendLine();
-        sb.AppendLine($"[GeneratedCode(\"CastelloBranco.Locator\", \"{version}\")]");
+        sb.AppendLine($"[GeneratedCode(\"{toolname}\", \"{version}\")]");
         sb.AppendLine("public class ViewLocator : IDataTemplate");
         sb.AppendLine("{");
         sb.AppendLine("    public static bool SupportsRecycling => false;");
@@ -163,10 +165,8 @@ public class LocatorSourceGenerator : ISourceGenerator
         sb.AppendLine("    public static readonly Dictionary<Type, Type?> ViewModelsViewsDictionary = new()");
         sb.AppendLine("    {");
 
-        for (int i = 0; i < viewModels.Length; i++)
+        foreach (var viewModelName in viewModels)
         {
-            string viewModelName = viewModels[i];
-
             string viewName = GetClassnameWithoutNamespace(viewModelName.Substring(0, viewModelName.Length - "Model".Length));
 
             string alternateViewName = GetClassnameWithoutNamespace(viewModelName.Substring(0, viewModelName.Length - "ViewModel".Length));
@@ -205,7 +205,7 @@ public class LocatorSourceGenerator : ISourceGenerator
         sb.AppendLine("        if (viewType == null)");
         sb.AppendLine("            return new TextBlock { Text = $\"Not Found: {viewModelTypeName} has no mapped View for ViewModel {viewModelTypeName} \" };");
         sb.AppendLine();
-        sb.AppendLine("        return (Ioc.Default.GetService(viewType) as Control ?? throw new Exception($\"Registered View {viewType.Name} for ViewModel {viewModelTypeName} is not an Control \"))");
+        sb.AppendLine("        return (Ioc.Default.GetService(viewType) as Control ?? throw new Exception($\"Registered View {viewType.Name} for ViewModel {viewModelTypeName} is not an Control.\"));");
         sb.AppendLine("    }");
         sb.AppendLine();
         sb.AppendLine("    public bool Match(object? data) => data is ObservableObject  ;");
